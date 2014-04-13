@@ -219,7 +219,7 @@ You might have to run `source ~/.bash_profile` for the `$PATH` to take effect.
 
 ## 2. Ruby
 
-The use of ruby version managers such as [RVM](http://rvm.io/), [rbenv](https://github.com/sstephenson/rbenv) or [chruby](https://github.com/postmodern/chruby) with GitLab in production frequently leads to hard to diagnose problems. Version managers are not supported and we stronly advise everyone to follow the instructions below to use a system ruby.
+The use of ruby version managers such as [RVM](http://rvm.io/), [rbenv](https://github.com/sstephenson/rbenv) or [chruby](https://github.com/postmodern/chruby) with GitLab in production frequently leads to hard to diagnose problems. Version managers are not supported and we strongly advise everyone to follow the instructions below to use a system ruby.
 
 Remove the old Ruby 1.8 package if present. Gitlab 6.7 only supports the Ruby 2.0.x release series:
 
@@ -342,7 +342,7 @@ Try connecting to the new database with the new user:
 
 ### 5.2 PostgreSQL
 
-GitLab makes use of the `CREATE EXTENSION` statement, this is available starting version 9.1. Version 9.3 is available and can be installed as follows, recipe taken from [here](https://wiki.postgresql.org/wiki/YUM_Installation)
+NOTE: because we need to make use of extensions we need at least pgsql 9.1 and the default 8.x on centos will not work.  We need to get the PGDG repositories enabled 
 
 Configure your YUM repository by editing the `/etc/yum.repos.d/CentOS-Base.repo, [base] and [updates] sections`. Append the following line
 
@@ -360,6 +360,18 @@ Install `postgresql93-server` and the `postgreqsql93-devel` libraries:
 
 yum install postgresql93-server postgresql93-devel
 
+Install the pgdg repositories
+
+    rpm -Uvh http://yum.postgresql.org/9.3/redhat/rhel-6-x86_64/pgdg-centos93-9.3-1.noarch.rpm
+
+
+Install `postgresql93-server` and the `postgreqsql93-devel` libraries:
+
+    yum install postgresql93-server postgresql93-devel
+
+Rename the service script
+
+    mv /etc/init.d/{postgresql-9.3,postgresql}
 
 Initialize the database:
 
@@ -396,6 +408,11 @@ If you see the following:
     gitlabhq_production=>
 
 Your password has been accepted successfully and you can type \q to quit.
+
+You should ensure you are using the right settings in your pg_hba.conf to not get ident issues
+NOTE: set to something like "host    all             all             127.0.0.1/32            trust"  use trust over ident
+
+   vi /var/lib/pgsql/9.3/data/pg_hba.conf
 
 
 ----------
